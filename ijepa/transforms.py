@@ -7,10 +7,9 @@
 
 from logging import getLogger
 
-from PIL import ImageFilter
-
 import torch
-import torchvision.transforms as transforms
+from PIL import ImageFilter
+from torchvision import transforms
 
 _GLOBAL_SEED = 0
 logger = getLogger()
@@ -23,20 +22,16 @@ def make_transforms(
     horizontal_flip=False,
     color_distortion=False,
     gaussian_blur=False,
-    normalization=((0.485, 0.456, 0.406),
-                   (0.229, 0.224, 0.225))
+    normalization=((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
 ):
-    logger.info('making imagenet data transforms')
+    logger.info("making imagenet data transforms")
 
     def get_color_distortion(s=1.0):
         # s is the strength of color distortion.
-        color_jitter = transforms.ColorJitter(0.8*s, 0.8*s, 0.8*s, 0.2*s)
+        color_jitter = transforms.ColorJitter(0.8 * s, 0.8 * s, 0.8 * s, 0.2 * s)
         rnd_color_jitter = transforms.RandomApply([color_jitter], p=0.8)
         rnd_gray = transforms.RandomGrayscale(p=0.2)
-        color_distort = transforms.Compose([
-            rnd_color_jitter,
-            rnd_gray])
-        return color_distort
+        return transforms.Compose([rnd_color_jitter, rnd_gray])
 
     transform_list = []
     transform_list += [transforms.RandomResizedCrop(crop_size, scale=crop_scale)]
@@ -49,12 +44,11 @@ def make_transforms(
     transform_list += [transforms.ToTensor()]
     transform_list += [transforms.Normalize(normalization[0], normalization[1])]
 
-    transform = transforms.Compose(transform_list)
-    return transform
+    return transforms.Compose(transform_list)
 
 
-class GaussianBlur(object):
-    def __init__(self, p=0.5, radius_min=0.1, radius_max=2.):
+class GaussianBlur:
+    def __init__(self, p=0.5, radius_min=0.1, radius_max=2.0) -> None:
         self.prob = p
         self.radius_min = radius_min
         self.radius_max = radius_max

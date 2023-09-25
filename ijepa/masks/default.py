@@ -13,9 +13,7 @@ _GLOBAL_SEED = 0
 logger = getLogger()
 
 
-class DefaultCollator(object):
-
+class DefaultCollator:
     def __call__(self, batch):
-
         collated_batch = torch.utils.data.default_collate(batch)
         return collated_batch, None, None
