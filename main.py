@@ -6,14 +6,12 @@
 #
 
 import argparse
-import multiprocessing as mp
-import pprint
 from pathlib import Path
 
 import yaml
+from loguru import logger
 
 from ijepa import main as app_main
-from ijepa.utils import init_distributed
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -31,19 +29,10 @@ parser.add_argument(
 )
 
 
-def process_main(rank, fname, world_size, devices):
+def process_main(fname, devices):
     import os
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(devices[rank].split(":")[-1])
-
-    import logging
-
-    logging.basicConfig()
-    logger = logging.getLogger()
-    if rank == 0:
-        logger.setLevel(logging.INFO)
-    else:
-        logger.setLevel(logging.ERROR)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(devices[0].split(":")[-1])
 
     logger.info(f"called-params {fname}")
 
@@ -52,22 +41,11 @@ def process_main(rank, fname, world_size, devices):
     with Path(fname).open() as y_file:
         params = yaml.load(y_file, Loader=yaml.FullLoader)  #
         logger.info("loaded params...")
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(params)
 
-    world_size, rank = init_distributed(rank_and_world_size=(rank, world_size))
-    logger.info(f"Running... (rank: {rank}/{world_size})")
     app_main(args=params)
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    num_gpus = len(args.devices)
-    mp.set_start_method("spawn")
-
-    for rank in range(num_gpus):
-        mp.Process(
-            target=process_main,
-            args=(rank, args.fname, num_gpus, args.devices),
-        ).start()
+    process_main(args.fname, args.devices)
