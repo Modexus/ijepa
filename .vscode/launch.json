@@ -23,6 +23,14 @@
                 "--fname",
                 "configs/in1k_vitt14_ep300.yaml"
             ]
+        },
+        {
+            "name": "Python: main_hydra.py",
+            "type": "python",
+            "request": "launch",
+            "program": "main_hydra.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
         }
     ]
 }

@@ -1,4 +1,3 @@
-from .experiment import ExperimentConfig
-from .datasets import ImageNetConfig
+from .experiments import ExperimentConfig
 
-__all__ = ["ExperimentConfig", "ImageNetConfig"]
+__all__ = ["ExperimentConfig"]

@@ -5,23 +5,23 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-import pytorch_lightning as pl
-from hydra_zen import ZenStore, to_yaml, zen
+from accelerate.utils import set_seed
+from hydra_zen import ZenStore, zen
 
-from ijepa import train
-from ijepa.configs import ExperimentConfig, ImageNetConfig
+from ijepa.configs import ExperimentConfig
 
-pre_seed = zen(lambda seed: pl.seed_everything(seed))
+pre_seed = zen(lambda seed: set_seed(seed))
 
-task_function = zen(lambda cfg: print(to_yaml(cfg)))
 
-# task_function = zen(train, pre_call=pre_seed)
+def test(dataloader):
+    5
+
+
+task_function = zen(test, pre_call=pre_seed)
+
 
 if __name__ == "__main__":
     store = ZenStore(deferred_hydra_store=False)
-    store(ImageNetConfig, name="train")
+    store(ExperimentConfig, name="train")
 
-
-    task_function.hydra_main(
-        config_name="train", version_base="1.1", config_path="."
-    )
+    task_function.hydra_main(config_name="train", version_base="1.1", config_path=".")

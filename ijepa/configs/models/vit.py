@@ -7,7 +7,8 @@ from ijepa.models import VisionTransformer, VisionTransformerPredictor
 
 VisionTransformerConf = builds(VisionTransformer, populate_full_signature=True)
 VisionTransformerPredictorConf = builds(
-    VisionTransformerPredictor, populate_full_signature=True
+    VisionTransformerPredictor,
+    populate_full_signature=True,
 )
 
 vit_tiny_conf = VisionTransformerConf(

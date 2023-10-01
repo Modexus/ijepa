@@ -12,7 +12,7 @@
         "CODE_OF_CONDUCT.md": true,
         "CONTRIBUTING.md": true,
         "README.md": true,
-        "*.toml": true,
+        "*.toml": false,
         "*.lock": true,
         ".ruff_cache": true,
         "**/__pycache__": true,
