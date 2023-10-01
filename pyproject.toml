@@ -17,6 +17,7 @@ torchvision = { url = "https://download.pytorch.org/whl/nightly/cu121/torchvisio
 transformers = "^4.33.3"
 accelerate = "^0.23.0"
 fastcore = "^1.5.29"
+torch-ema = "^0.3"
 
 [tool.poetry.group.dev.dependencies]
 hydra-core = "^1.3.2"

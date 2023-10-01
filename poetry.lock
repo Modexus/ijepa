@@ -1735,6 +1735,20 @@ type = "url"
 url = "https://download.pytorch.org/whl/nightly/cu121/torch-2.2.0.dev20230912%2Bcu121-cp311-cp311-linux_x86_64.whl"
 
 [[package]]
+name = "torch-ema"
+version = "0.3"
+description = "PyTorch library for computing moving averages of model parameters."
+optional = false
+python-versions = "*"
+files = [
+    {file = "torch_ema-0.3-py3-none-any.whl", hash = "sha256:823ad8da5c10bc1eebcec739cc3f521aa9573229fe04e5673c304d29f1433279"},
+    {file = "torch_ema-0.3.tar.gz", hash = "sha256:5a3595405fa311995f01291a1d4a9242d6be08a0fc9db29152ec6cfd586ea414"},
+]
+
+[package.dependencies]
+torch = "*"
+
+[[package]]
 name = "torchmetrics"
 version = "1.2.0"
 description = "PyTorch native Metrics"
@@ -2111,4 +2125,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "98440ee9eb66808b1b16f4050a97d98270403fbfcb76e418b2f2d481cbbf3cd2"
+content-hash = "8185a54d02e9c9c5a92462e1e252f3f971a0d0d808cc66fa4015071af4157fcf"

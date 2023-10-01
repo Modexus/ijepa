@@ -1,4 +1,3 @@
-from .train import main
-from .train_hydra import train
+from .train import train
 
-__all__ = ["main", "train"]
+__all__ = ["train"]

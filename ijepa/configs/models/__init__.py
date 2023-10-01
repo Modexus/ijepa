@@ -1,3 +1,8 @@
-from .vit import ViTEncoderTinyConf, ViTBasePredictorConf
+from .ema import ExponentialMovingAverageBaseConf
+from .vit import ViTBasePredictorConf, ViTEncoderTinyConf
 
-__all__ = ["ViTEncoderTinyConf", "ViTBasePredictorConf"]
+__all__ = [
+    "ViTBasePredictorConf",
+    "ViTEncoderTinyConf",
+    "ExponentialMovingAverageBaseConf",
+]

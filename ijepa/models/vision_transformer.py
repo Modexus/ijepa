@@ -549,6 +549,7 @@ def vit_predictor(**kwargs):
         **kwargs,
     )
 
+
 def vit_tiny(patch_size=16, **kwargs):
     return VisionTransformer(
         patch_size=patch_size,

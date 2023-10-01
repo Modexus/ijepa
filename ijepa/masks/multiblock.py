@@ -6,6 +6,7 @@
 #
 
 import math
+from collections.abc import Iterable
 from logging import getLogger
 from multiprocessing import Value
 
@@ -29,7 +30,7 @@ class MaskCollator:
         allow_overlap=False,
     ) -> None:
         super().__init__()
-        if not isinstance(input_size, tuple):
+        if not isinstance(input_size, Iterable):
             input_size = (input_size,) * 2
         self.patch_size = patch_size
         self.height, self.width = (
@@ -180,4 +181,11 @@ class MaskCollator:
         ]
         collated_masks_enc = torch.utils.data.default_collate(collated_masks_enc)
 
-        return collated_batch, collated_masks_enc, collated_masks_pred
+        collated_masks_pred_nested = torch.nested.as_nested_tensor(collated_masks_pred)
+        collated_masks_enc_nested = torch.nested.as_nested_tensor(collated_masks_enc)
+
+        return {
+            "image": collated_batch["image"],
+            "masks_enc": collated_masks_pred_nested,
+            "masks_pred": collated_masks_enc_nested,
+        }

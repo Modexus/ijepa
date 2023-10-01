@@ -30,7 +30,7 @@
             "request": "launch",
             "program": "main_hydra.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
         }
     ]
 }
