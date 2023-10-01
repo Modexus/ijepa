@@ -1,11 +1,9 @@
-import torch
 from hydra_zen import builds, just
 from torchvision.transforms.v2 import (
     Compose,
     InterpolationMode,
     PILToTensor,
     RandomResizedCrop,
-    ToDtype,
 )
 
 PILToTensorConfig = builds(PILToTensor)

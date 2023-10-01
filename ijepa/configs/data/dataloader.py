@@ -13,5 +13,7 @@ TrainDataLoaderConfig = builds(
 )
 
 ImageNetTrainDataLoaderConfig = builds(
-    DataLoader, dataset=ImageNetConfig, builds_bases=(TrainDataLoaderConfig,)
+    DataLoader,
+    dataset=ImageNetConfig,
+    builds_bases=(TrainDataLoaderConfig,),
 )

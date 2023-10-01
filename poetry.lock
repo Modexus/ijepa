@@ -411,6 +411,24 @@ files = [
 graph = ["objgraph (>=1.7.2)"]
 
 [[package]]
+name = "fastcore"
+version = "1.5.29"
+description = "Python supercharged for fastai development"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "fastcore-1.5.29-py3-none-any.whl", hash = "sha256:a7d7e89faf968f2d8584df2deca344c3974f6cf476e1299cd3c067d8fa7440e9"},
+    {file = "fastcore-1.5.29.tar.gz", hash = "sha256:f1a2eb04eb7933f3f9eb4064852817df44dc96e20fab5658c14c035815269a3f"},
+]
+
+[package.dependencies]
+packaging = "*"
+pip = "*"
+
+[package.extras]
+dev = ["jupyterlab", "matplotlib", "nbdev (>=0.2.39)", "numpy", "pandas", "pillow", "torch"]
+
+[[package]]
 name = "filelock"
 version = "3.12.4"
 description = "A platform independent file lock."
@@ -1156,6 +1174,17 @@ files = [
 [package.extras]
 docs = ["furo", "olefile", "sphinx (>=2.4)", "sphinx-copybutton", "sphinx-inline-tabs", "sphinx-removed-in", "sphinxext-opengraph"]
 tests = ["check-manifest", "coverage", "defusedxml", "markdown2", "olefile", "packaging", "pyroma", "pytest", "pytest-cov", "pytest-timeout"]
+
+[[package]]
+name = "pip"
+version = "23.2.1"
+description = "The PyPA recommended tool for installing Python packages."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pip-23.2.1-py3-none-any.whl", hash = "sha256:7ccf472345f20d35bdc9d1841ff5f313260c2c33fe417f48c30ac46cccabf5be"},
+    {file = "pip-23.2.1.tar.gz", hash = "sha256:fb0bd5435b3200c602b5bf61d2d43c2f13c02e29c1707567ae7fbc514eb9faf2"},
+]
 
 [[package]]
 name = "platformdirs"
@@ -2082,4 +2111,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "deb78ff901ff212d255c2e2f37957ee87e0f3edc95e4211f448843eb5594127d"
+content-hash = "98440ee9eb66808b1b16f4050a97d98270403fbfcb76e418b2f2d481cbbf3cd2"

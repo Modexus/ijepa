@@ -1,16 +1,17 @@
-from hydra_zen import make_config, make_custom_builds_fn
+from hydra_zen import make_config
 
 from ijepa.configs.data import ImageNetTrainDataLoaderConfig
-from torch.utils.data import DataLoader
+from ijepa.configs.models import ViTBasePredictorConf, ViTEncoderTinyConf
 
 ExperimentConfig = make_config(
     seed=42,
-    encoder=None,
-    predictor=None,
+    encoder=ViTEncoderTinyConf,
+    predictor=ViTBasePredictorConf,
     dataloader=ImageNetTrainDataLoaderConfig,
     optimizer=None,
     scheduler=None,
     wd_scheduler=None,
     momentum_scheduler=None,
     num_epochs=10,
+    image_size=224,
 )

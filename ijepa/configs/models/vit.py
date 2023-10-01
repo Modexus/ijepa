@@ -1,52 +1,61 @@
-from functools import partial
-
-from hydra_zen import builds
+from hydra_zen import builds, store
 from torch import nn
 
 from ijepa.models import VisionTransformer, VisionTransformerPredictor
 
-VisionTransformerConf = builds(VisionTransformer, populate_full_signature=True)
-VisionTransformerPredictorConf = builds(
-    VisionTransformerPredictor,
+LayerNormConf = builds(nn.LayerNorm, zen_partial=True, populate_full_signature=True)
+ViTEncoderBaseConf = builds(
+    VisionTransformer,
+    norm_layer=LayerNormConf(eps=1e-6),
+    zen_partial=True,
     populate_full_signature=True,
 )
 
-vit_tiny_conf = VisionTransformerConf(
+ViTEncoderTinyConf = ViTEncoderBaseConf(
     embed_dim=192,
     num_heads=3,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6),
 )
 
-vit_small_conf = VisionTransformerConf(
+ViTEncoderSmallConf = ViTEncoderBaseConf(
     embed_dim=384,
     num_heads=6,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6),
 )
 
-vit_base_conf = VisionTransformerConf(
-    embed_dim=768,
-    num_heads=12,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6),
-)
-
-vit_large_conf = VisionTransformerConf(
+ViTEncoderLargeConf = ViTEncoderBaseConf(
     embed_dim=1024,
     num_heads=16,
     depth=24,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6),
 )
 
-vit_huge_conf = VisionTransformerConf(
+ViTEncoderHugeConf = ViTEncoderBaseConf(
     embed_dim=1280,
     num_heads=16,
     depth=32,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6),
 )
 
-vit_giant_conf = VisionTransformerConf(
+ViTEncoderGiantConf = ViTEncoderBaseConf(
     embed_dim=1408,
     num_heads=16,
     depth=40,
     mlp_ratio=48 / 11,
-    norm_layer=partial(nn.LayerNorm, eps=1e-6),
 )
+
+ViTBasePredictorConf = builds(
+    VisionTransformerPredictor,
+    populate_full_signature=True,
+    zen_partial=True,
+)
+
+model_store = store(package="models")
+encoder_store = model_store(group="encoder")
+
+ViTBase = encoder_store(ViTEncoderBaseConf, name="base")
+encoder_store(ViTEncoderTinyConf, name="tiny")
+encoder_store(ViTEncoderSmallConf, name="small")
+encoder_store(ViTEncoderLargeConf, name="large")
+encoder_store(ViTEncoderHugeConf, name="huge")
+encoder_store(ViTEncoderGiantConf, name="giant")
+
+predictor_store = model_store(group="predictor")
+
+predictor_store(ViTBasePredictorConf, name="base")

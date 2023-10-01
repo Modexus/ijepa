@@ -1,10 +1,3 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-#
-
 from copy import deepcopy
 
 import numpy as np
@@ -12,6 +5,8 @@ import torch
 import torch.nn.functional as F
 from accelerate import Accelerator
 from loguru import logger
+from torch.nn import Module
+from torch.utils.data import DataLoader
 
 from ijepa.masks.utils import apply_masks
 from ijepa.utils.logging import AverageMeter, gpu_timer, grad_logger
@@ -19,16 +14,24 @@ from ijepa.utils.tensors import repeat_interleave_batch
 
 
 def train(
-    encoder,
-    predictor,
-    dataloader,
-    optimizer,
-    scheduler,
-    wd_scheduler,
-    momentum_scheduler,
-    num_epochs,
+    encoder: Module,
+    predictor: Module,
+    dataloader: DataLoader,
+    # optimizer,
+    # scheduler,
+    # wd_scheduler,
+    # momentum_scheduler,
+    num_epochs: int,
+    image_size: int,
 ):
+    encoder = encoder(img_size=(image_size, image_size))
     target_encoder = deepcopy(encoder)
+
+    predictor = predictor(
+        num_patches=encoder.patch_embed.num_patches,
+        embed_dim=encoder.embed_dim,
+        num_heads=encoder.num_heads,
+    )
 
     accelerator = Accelerator()
     (
