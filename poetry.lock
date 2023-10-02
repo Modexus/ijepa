@@ -391,6 +391,7 @@ multiprocess = "*"
 numpy = ">=1.17"
 packaging = "*"
 pandas = "*"
+Pillow = {version = ">=6.2.1", optional = true, markers = "extra == \"vision\""}
 pyarrow = ">=8.0.0"
 pyyaml = ">=5.1"
 requests = ">=2.19.0"
@@ -667,26 +668,6 @@ MarkupSafe = ">=2.0"
 
 [package.extras]
 i18n = ["Babel (>=2.7)"]
-
-[[package]]
-name = "lightning-utilities"
-version = "0.9.0"
-description = "PyTorch Lightning Sample project."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "lightning-utilities-0.9.0.tar.gz", hash = "sha256:efbf2c488c257f942abdfd06cf646fb84ca215a9663b60081811e22a15ee033b"},
-    {file = "lightning_utilities-0.9.0-py3-none-any.whl", hash = "sha256:918dd90c775719e3855631db6282ad75c14da4c5727c4cebdd1589d865fad03d"},
-]
-
-[package.dependencies]
-packaging = ">=17.1"
-typing-extensions = "*"
-
-[package.extras]
-cli = ["fire"]
-docs = ["requests (>=2.0.0)"]
-typing = ["mypy (>=1.0.0)"]
 
 [[package]]
 name = "loguru"
@@ -1303,57 +1284,26 @@ files = [
 six = ">=1.5"
 
 [[package]]
-name = "pytorch-lightning"
-version = "2.0.9.post0"
-description = "PyTorch Lightning is the lightweight PyTorch wrapper for ML researchers. Scale your models. Write less boilerplate."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pytorch-lightning-2.0.9.post0.tar.gz", hash = "sha256:435b22e3b3ef7d64131bb8e3fb00bbfeb16d2fae33c78b5ee54058dee1948a26"},
-    {file = "pytorch_lightning-2.0.9.post0-py3-none-any.whl", hash = "sha256:adef569cd84053889b7bbf566be7506385170b4e82401bedfd6bcadf3aba557a"},
-]
-
-[package.dependencies]
-fsspec = {version = ">2021.06.0", extras = ["http"]}
-lightning-utilities = ">=0.7.0"
-numpy = ">=1.17.2"
-packaging = ">=17.1"
-PyYAML = ">=5.4"
-torch = ">=1.11.0"
-torchmetrics = ">=0.7.0"
-tqdm = ">=4.57.0"
-typing-extensions = ">=4.0.0"
-
-[package.extras]
-all = ["deepspeed (>=0.8.2)", "gym[classic-control] (>=0.17.0)", "hydra-core (>=1.0.5)", "ipython[all] (<8.15.0)", "jsonargparse[signatures] (>=4.18.0,<4.25.0)", "lightning-utilities (>=0.7.0)", "matplotlib (>3.1)", "omegaconf (>=2.0.5)", "rich (>=12.3.0)", "tensorboardX (>=2.2)", "torchmetrics (>=0.10.0)", "torchvision (>=0.12.0)"]
-deepspeed = ["deepspeed (>=0.8.2)"]
-dev = ["cloudpickle (>=1.3)", "coverage (==7.3.0)", "deepspeed (>=0.8.2)", "fastapi (<0.100.0)", "gym[classic-control] (>=0.17.0)", "hydra-core (>=1.0.5)", "ipython[all] (<8.15.0)", "jsonargparse[signatures] (>=4.18.0,<4.25.0)", "lightning-utilities (>=0.7.0)", "matplotlib (>3.1)", "omegaconf (>=2.0.5)", "onnx (<1.15.0)", "onnxruntime (<1.16.0)", "pandas (>1.0)", "protobuf (<3.21.0)", "psutil (<5.9.6)", "pytest (==7.4.0)", "pytest-cov (==4.1.0)", "pytest-forked (==1.4.0)", "pytest-rerunfailures (==10.3)", "rich (>=12.3.0)", "scikit-learn (>0.22.1)", "tensorboard (>=2.9.1)", "tensorboardX (>=2.2)", "torchmetrics (>=0.10.0)", "torchvision (>=0.12.0)", "uvicorn (<0.23.3)"]
-examples = ["gym[classic-control] (>=0.17.0)", "ipython[all] (<8.15.0)", "lightning-utilities (>=0.7.0)", "torchmetrics (>=0.10.0)", "torchvision (>=0.12.0)"]
-extra = ["hydra-core (>=1.0.5)", "jsonargparse[signatures] (>=4.18.0,<4.25.0)", "matplotlib (>3.1)", "omegaconf (>=2.0.5)", "rich (>=12.3.0)", "tensorboardX (>=2.2)"]
-strategies = ["deepspeed (>=0.8.2)"]
-test = ["cloudpickle (>=1.3)", "coverage (==7.3.0)", "fastapi (<0.100.0)", "onnx (<1.15.0)", "onnxruntime (<1.16.0)", "pandas (>1.0)", "protobuf (<3.21.0)", "psutil (<5.9.6)", "pytest (==7.4.0)", "pytest-cov (==4.1.0)", "pytest-forked (==1.4.0)", "pytest-rerunfailures (==10.3)", "scikit-learn (>0.22.1)", "tensorboard (>=2.9.1)", "uvicorn (<0.23.3)"]
-
-[[package]]
 name = "pytorch-triton"
-version = "2.1.0+6e4932cda8"
+version = "2.1.0+e6216047b8"
 description = "A language and compiler for custom Deep Learning operations"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pytorch_triton-2.1.0+6e4932cda8-cp310-cp310-linux_x86_64.whl", hash = "sha256:5b17dabd84aee11a706fd9760bdf6c169b612f1fc02ba0949997c8af162b9db1"},
+    {file = "pytorch_triton-2.1.0+e6216047b8-cp310-cp310-linux_x86_64.whl", hash = "sha256:9623405c970a146990c16b14b18788469486d07622a48d85b3c7b12d496a207b"},
 ]
 
 [package.dependencies]
 filelock = "*"
 
 [package.extras]
-build = ["cmake (>=3.20)", "lit"]
-tests = ["autopep8", "flake8", "isort", "numpy", "pytest", "scipy (>=1.7.1)", "torch"]
-tutorials = ["matplotlib", "pandas", "tabulate", "torch"]
+build = ["cmake (>=3.18)", "lit"]
+tests = ["autopep8", "flake8", "isort", "numpy", "pytest", "scipy (>=1.7.1)"]
+tutorials = ["matplotlib", "pandas", "tabulate"]
 
 [package.source]
 type = "url"
-url = "https://download.pytorch.org/whl/nightly/pytorch_triton-2.1.0%2B6e4932cda8-cp310-cp310-linux_x86_64.whl"
+url = "https://download.pytorch.org/whl/nightly/pytorch_triton-2.1.0%2Be6216047b8-cp310-cp310-linux_x86_64.whl"
 
 [[package]]
 name = "pytz"
@@ -1740,12 +1690,12 @@ files = [
 
 [[package]]
 name = "torch"
-version = "2.2.0.dev20231002+cu121"
+version = "2.1.0.dev20230904+cu121"
 description = "Tensors and Dynamic neural networks in Python with strong GPU acceleration"
 optional = false
 python-versions = ">=3.8.0"
 files = [
-    {file = "torch-2.2.0.dev20231002+cu121-cp310-cp310-linux_x86_64.whl", hash = "sha256:3499c45edb5ff42fd53d3096bc7e561c4e184d7ee95e7e1770d9ed21b6916963"},
+    {file = "torch-2.1.0.dev20230904+cu121-cp310-cp310-linux_x86_64.whl", hash = "sha256:ffe9ff58940170506810264b6d2f9b01c9a3613b3e4b12f79ec31db97d72b8f2"},
 ]
 
 [package.dependencies]
@@ -1753,18 +1703,17 @@ filelock = "*"
 fsspec = "*"
 jinja2 = "*"
 networkx = "*"
-pytorch-triton = "2.1.0+6e4932cda8"
+pytorch-triton = "2.1.0+e6216047b8"
 sympy = "*"
 typing-extensions = "*"
 
 [package.extras]
 dynamo = ["jinja2"]
 opt-einsum = ["opt-einsum (>=3.3)"]
-optree = ["optree (>=0.9.1)"]
 
 [package.source]
 type = "url"
-url = "https://download.pytorch.org/whl/nightly/cu121/torch-2.2.0.dev20231002%2Bcu121-cp310-cp310-linux_x86_64.whl"
+url = "https://download.pytorch.org/whl/nightly/cu121/torch-2.1.0.dev20230904%2Bcu121-cp310-cp310-linux_x86_64.whl"
 
 [[package]]
 name = "torch-ema"
@@ -1781,55 +1730,27 @@ files = [
 torch = "*"
 
 [[package]]
-name = "torchmetrics"
-version = "1.2.0"
-description = "PyTorch native Metrics"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "torchmetrics-1.2.0-py3-none-any.whl", hash = "sha256:da2cb18822b285786d082c40efb9e1d861aac425f58230234fe6ce233cf002f8"},
-    {file = "torchmetrics-1.2.0.tar.gz", hash = "sha256:7eb28340bde45e13187a9ad54a4a7010a50417815d8181a5df6131f116ffe1b7"},
-]
-
-[package.dependencies]
-lightning-utilities = ">=0.8.0"
-numpy = ">1.20.0"
-torch = ">=1.8.1"
-
-[package.extras]
-all = ["SciencePlots (>=2.0.0)", "lpips (<=0.1.4)", "matplotlib (>=3.2.0)", "mypy (==1.5.1)", "nltk (>=3.6)", "piq (<=0.8.0)", "pycocotools (>2.0.0)", "pystoi (>=0.3.0)", "regex (>=2021.9.24)", "scipy (>1.0.0)", "torch-fidelity (<=0.4.0)", "torchaudio (>=0.10.0)", "torchvision (>=0.8)", "tqdm (>=4.41.0)", "transformers (>4.4.0)", "transformers (>=4.10.0)", "types-PyYAML", "types-emoji", "types-protobuf", "types-requests", "types-setuptools", "types-six", "types-tabulate"]
-audio = ["pystoi (>=0.3.0)", "torchaudio (>=0.10.0)"]
-detection = ["pycocotools (>2.0.0)", "torchvision (>=0.8)"]
-dev = ["SciencePlots (>=2.0.0)", "bert-score (==0.3.13)", "cloudpickle (>1.3)", "coverage (==7.3.1)", "dython (<=0.7.4)", "fairlearn", "fast-bss-eval (>=0.1.0)", "faster-coco-eval (>=1.3.3)", "fire (<=0.5.0)", "huggingface-hub (<0.18)", "jiwer (>=2.3.0)", "kornia (>=0.6.7)", "lpips (<=0.1.4)", "matplotlib (>=3.2.0)", "mir-eval (>=0.6)", "mypy (==1.5.1)", "netcal (>1.0.0)", "nltk (>=3.6)", "numpy (<1.25.0)", "pandas (>1.0.0)", "pandas (>=1.4.0)", "phmdoctest (==1.4.0)", "piq (<=0.8.0)", "psutil (<=5.9.5)", "pycocotools (>2.0.0)", "pystoi (>=0.3.0)", "pytest (==7.4.2)", "pytest-cov (==4.1.0)", "pytest-doctestplus (==1.0.0)", "pytest-rerunfailures (==12.0)", "pytest-timeout (==2.1.0)", "pytorch-msssim (==1.0.0)", "regex (>=2021.9.24)", "requests (<=2.31.0)", "rouge-score (>0.1.0)", "sacrebleu (>=2.0.0)", "scikit-image (>=0.19.0)", "scikit-learn (>=1.1.1)", "scipy (>1.0.0)", "sewar (>=0.4.4)", "statsmodels (>0.13.5)", "torch-complex (<=0.4.3)", "torch-fidelity (<=0.4.0)", "torchaudio (>=0.10.0)", "torchvision (>=0.8)", "tqdm (>=4.41.0)", "transformers (>4.4.0)", "transformers (>=4.10.0)", "types-PyYAML", "types-emoji", "types-protobuf", "types-requests", "types-setuptools", "types-six", "types-tabulate"]
-image = ["lpips (<=0.1.4)", "scipy (>1.0.0)", "torch-fidelity (<=0.4.0)", "torchvision (>=0.8)"]
-multimodal = ["piq (<=0.8.0)", "transformers (>=4.10.0)"]
-test = ["bert-score (==0.3.13)", "cloudpickle (>1.3)", "coverage (==7.3.1)", "dython (<=0.7.4)", "fairlearn", "fast-bss-eval (>=0.1.0)", "faster-coco-eval (>=1.3.3)", "fire (<=0.5.0)", "huggingface-hub (<0.18)", "jiwer (>=2.3.0)", "kornia (>=0.6.7)", "mir-eval (>=0.6)", "netcal (>1.0.0)", "numpy (<1.25.0)", "pandas (>1.0.0)", "pandas (>=1.4.0)", "phmdoctest (==1.4.0)", "psutil (<=5.9.5)", "pytest (==7.4.2)", "pytest-cov (==4.1.0)", "pytest-doctestplus (==1.0.0)", "pytest-rerunfailures (==12.0)", "pytest-timeout (==2.1.0)", "pytorch-msssim (==1.0.0)", "requests (<=2.31.0)", "rouge-score (>0.1.0)", "sacrebleu (>=2.0.0)", "scikit-image (>=0.19.0)", "scikit-learn (>=1.1.1)", "scipy (>1.0.0)", "sewar (>=0.4.4)", "statsmodels (>0.13.5)", "torch-complex (<=0.4.3)"]
-text = ["nltk (>=3.6)", "regex (>=2021.9.24)", "tqdm (>=4.41.0)", "transformers (>4.4.0)"]
-typing = ["mypy (==1.5.1)", "types-PyYAML", "types-emoji", "types-protobuf", "types-requests", "types-setuptools", "types-six", "types-tabulate"]
-visual = ["SciencePlots (>=2.0.0)", "matplotlib (>=3.2.0)"]
-
-[[package]]
 name = "torchvision"
-version = "0.17.0.dev20231002+cu121"
+version = "0.16.0.dev20230904+cu121"
 description = "image and video datasets and models for torch deep learning"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "torchvision-0.17.0.dev20231002+cu121-cp310-cp310-linux_x86_64.whl", hash = "sha256:bf3f3d455538c85dd696f8b7b5dd40b62e11459f841309634e0d0129f17529d7"},
+    {file = "torchvision-0.16.0.dev20230904+cu121-cp310-cp310-linux_x86_64.whl", hash = "sha256:3115f2abcf2a3b6de7e8898ef806bb0f9e604466691d3977b53a433285a2486e"},
 ]
 
 [package.dependencies]
 numpy = "*"
 pillow = ">=5.3.0,<8.3.dev0 || >=8.4.dev0"
 requests = "*"
-torch = "2.2.0.dev20231002"
+torch = "2.1.0.dev20230904"
 
 [package.extras]
 scipy = ["scipy"]
 
 [package.source]
 type = "url"
-url = "https://download.pytorch.org/whl/nightly/cu121/torchvision-0.17.0.dev20231002%2Bcu121-cp310-cp310-linux_x86_64.whl"
+url = "https://download.pytorch.org/whl/nightly/cu121/torchvision-0.16.0.dev20230904%2Bcu121-cp310-cp310-linux_x86_64.whl"
 
 [[package]]
 name = "tqdm"
@@ -2157,4 +2078,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "0523015a3a5857194996419b412c8393d8519d0a5cb5b909f8b9bb99df5b4e75"
+content-hash = "1c204823f646289e4b2de6f2d79b5b15e900360e42c081393cf23b9f744278a9"

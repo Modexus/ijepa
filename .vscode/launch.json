@@ -25,10 +25,10 @@
             ]
         },
         {
-            "name": "Python: main_hydra.py",
+            "name": "Python: train_hydra.py",
             "type": "python",
             "request": "launch",
-            "program": "main_hydra.py",
+            "program": "train_hydra.py",
             "console": "integratedTerminal",
             "justMyCode": false,
         }
