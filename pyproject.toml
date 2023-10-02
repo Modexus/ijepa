@@ -6,14 +6,14 @@ authors = ["Mike Boss"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 pytorch-lightning = "^2.0.9"
 datasets = "^2.14.5"
 loguru = "^0.7.2"
 pillow = "^10.0.1"
-pytorch-triton = { url = "https://download.pytorch.org/whl/nightly/pytorch_triton-2.1.0%2B6e4932cda8-cp311-cp311-linux_x86_64.whl" }
-torch = { url = "https://download.pytorch.org/whl/nightly/cu121/torch-2.2.0.dev20230912%2Bcu121-cp311-cp311-linux_x86_64.whl" }
-torchvision = { url = "https://download.pytorch.org/whl/nightly/cu121/torchvision-0.17.0.dev20230912%2Bcu121-cp311-cp311-linux_x86_64.whl" }
+pytorch-triton = { url = "https://download.pytorch.org/whl/nightly/pytorch_triton-2.1.0%2B6e4932cda8-cp310-cp310-linux_x86_64.whl" }
+torch = { url = "https://download.pytorch.org/whl/nightly/cu121/torch-2.2.0.dev20231002%2Bcu121-cp310-cp310-linux_x86_64.whl" }
+torchvision = { url = "https://download.pytorch.org/whl/nightly/cu121/torchvision-0.17.0.dev20231002%2Bcu121-cp310-cp310-linux_x86_64.whl" }
 transformers = "^4.33.3"
 accelerate = "^0.23.0"
 fastcore = "^1.5.29"
