@@ -1,4 +1,5 @@
 from functools import partial
+
 from hydra_zen import builds, just, store
 from torchvision.transforms.v2 import (
     Compose,
@@ -35,7 +36,7 @@ TinyImageNetTransformsConfig = builds(
     transforms=[
         PILToTensorConfig,
         just(scale_01),
-        partial(RandomResizedCropConfig, scale=(0.7, 1.0)),
+        RandomResizedCropConfig(scale=(0.7, 1.0)),
     ],
 )
 

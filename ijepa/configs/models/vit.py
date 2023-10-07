@@ -1,5 +1,3 @@
-from functools import partial
-
 from hydra_zen import builds, store
 from torch import nn
 
@@ -10,48 +8,19 @@ ViTEncoderBaseConf = builds(
     VisionTransformer,
     img_size=("${image_size}", "${image_size}"),
     norm_layer=LayerNormConf(eps=1e-6),
-    zen_partial=True,
     populate_full_signature=True,
 )
 
-ViTEncoderTinyConf = partial(
-    ViTEncoderBaseConf,
-    embed_dim=192,
-    num_heads=3,
-)
-
-ViTEncoderSmallConf = partial(
-    ViTEncoderBaseConf,
-    embed_dim=384,
-    num_heads=6,
-)
-
-ViTEncoderLargeConf = partial(
-    ViTEncoderBaseConf,
-    embed_dim=1024,
-    num_heads=16,
-    depth=24,
-)
-
-ViTEncoderHugeConf = partial(
-    ViTEncoderBaseConf,
-    embed_dim=1280,
-    num_heads=16,
-    depth=32,
-)
-
-ViTEncoderGiantConf = partial(
-    ViTEncoderBaseConf,
-    embed_dim=1408,
-    num_heads=16,
-    depth=40,
-    mlp_ratio=48 / 11,
+ViTEncoderTinyConf = ViTEncoderBaseConf(embed_dim=192, num_heads=3)
+ViTEncoderSmallConf = ViTEncoderBaseConf(embed_dim=384, num_heads=6)
+ViTEncoderLargeConf = ViTEncoderBaseConf(embed_dim=1024, num_heads=16, depth=24)
+ViTEncoderHugeConf = ViTEncoderBaseConf(embed_dim=1280, num_heads=16, depth=32)
+ViTEncoderGiantConf = ViTEncoderBaseConf(
+    embed_dim=1408, num_heads=16, depth=40, mlp_ratio=48 / 11
 )
 
 ViTBasePredictorConf = builds(
-    VisionTransformerPredictor,
-    populate_full_signature=True,
-    zen_partial=True,
+    VisionTransformerPredictor, populate_full_signature=True, zen_partial=True
 )
 
 encoder_store = store(group="encoder")

@@ -45,20 +45,11 @@ def train(
     momentum_scheduler = momentum_scheduler_partial(encoder.parameters())
 
     accelerator = Accelerator(even_batches=False)
-    (
-        encoder,
-        predictor,
-        target_encoder,
-        optimizer,
-        dataloader,
-        scheduler,
-    ) = accelerator.prepare(
-        encoder,
-        predictor,
-        target_encoder,
-        optimizer,
-        dataloader,
-        scheduler,
+    encoder, predictor, target_encoder, momentum_scheduler = accelerator.prepare(
+        encoder, predictor, target_encoder, momentum_scheduler
+    )
+    optimizer, dataloader, scheduler = accelerator.prepare(
+        optimizer, dataloader, scheduler
     )
 
     for _ in tqdm(range(num_epochs)):
