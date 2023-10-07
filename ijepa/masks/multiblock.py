@@ -55,8 +55,8 @@ class MaskCollator:
     @staticmethod
     def _sample_block_size(
         generator: Generator,
-        scale: int,
-        aspect_ratio_scale: int,
+        scale: tuple[int, int],
+        aspect_ratio_scale: tuple[int, int],
         height: int,
         width: int,
     ) -> tuple[int, int]:
@@ -165,7 +165,10 @@ class MaskCollator:
             masks_p, masks_C = [], []
             for _ in range(self.num_predictions):
                 mask, mask_C = self._sample_block_mask(
-                    prediction_size, self.height, self.width, self.min_keep
+                    prediction_size,
+                    self.height,
+                    self.width,
+                    self.min_keep,
                 )
                 masks_p.append(mask)
                 masks_C.append(mask_C)

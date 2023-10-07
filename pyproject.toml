@@ -15,11 +15,11 @@ torchvision = { url = "https://download.pytorch.org/whl/nightly/cu121/torchvisio
 transformers = "^4.33.3"
 accelerate = "^0.23.0"
 fastcore = "^1.5.29"
-torch-ema = "^0.3"
 datasets = { extras = ["vision"], version = "^2.14.5" }
 kornia = "^0.7.0"
+diffusers = "^0.21.4"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.config.dependencies]
 hydra-core = "^1.3.2"
 hydra-zen = "^0.11.0"
 

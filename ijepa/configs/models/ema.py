@@ -1,9 +1,9 @@
+from diffusers.training_utils import EMAModel
 from hydra_zen import builds
-from torch_ema import ExponentialMovingAverage
 
-ExponentialMovingAverageBaseConf = builds(
-    ExponentialMovingAverage,
+EMAModelConf = builds(
+    EMAModel,
     decay=0.995,
     zen_partial=True,
-    populate_full_signature=True,
+    populate_full_signature=False,
 )

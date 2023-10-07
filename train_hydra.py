@@ -9,18 +9,18 @@ from accelerate.utils import set_seed
 from hydra_zen import store, zen
 
 from ijepa import train
-from ijepa.configs import ExperimentConfig
+from ijepa.configs import TrainImagenet1kConf
 
 pre_seed = zen(lambda seed: set_seed(seed))
 task_function = zen(train, pre_call=pre_seed)
 
 
 if __name__ == "__main__":
-    store(ExperimentConfig, name="train")
+    store(TrainImagenet1kConf, name="default")
     store.add_to_hydra_store()
 
     task_function.hydra_main(
-        config_name="train",
-        version_base="1.1",
-        config_path="configs",
+        config_name="default",
+        version_base=None,
+        config_path="configs"
     )

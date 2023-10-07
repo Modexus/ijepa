@@ -1,3 +1,3 @@
-from .experiments import ExperimentConfig
+from .experiments import TrainImagenet1kConf
 
-__all__ = ["ExperimentConfig"]
+__all__ = ["TrainImagenet1kConf"]

@@ -13,24 +13,24 @@
             "justMyCode": true
         },
         {
-            "name": "Python: main.py",
-            "type": "python",
-            "request": "launch",
-            "program": "main.py",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": [
-                "--fname",
-                "configs/in1k_vitt14_ep300.yaml"
-            ]
-        },
-        {
-            "name": "Python: train_hydra.py",
+            "name": "Python: train imagenet1k",
             "type": "python",
             "request": "launch",
             "program": "train_hydra.py",
             "console": "integratedTerminal",
-            "justMyCode": false,
+            "justMyCode": true,
+        },
+        {
+            "name": "Python: train tiny_imagenet",
+            "type": "python",
+            "request": "launch",
+            "program": "train_hydra.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-cn",
+                "train_tinyimagenet"
+            ]
         }
     ]
 }

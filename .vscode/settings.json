@@ -19,5 +19,7 @@
         "**/.vscode": true,
         "**/LICENSE": true
     },
-    "explorerExclude.backup": {}
+    "explorerExclude.backup": {},
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true
 }

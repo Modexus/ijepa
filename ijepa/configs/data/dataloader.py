@@ -1,7 +1,7 @@
-from hydra_zen import builds
+from hydra_zen import builds, store
 from torch.utils.data import DataLoader
 
-from ijepa.configs.data.datasets import ImageNetConfig
+from ijepa.configs.data.datasets import CIFAR100Conf, ImageNet1kConf, TinyImageNetConf
 from ijepa.configs.masks import MultiBlockMaskBaseCollatorConf
 
 TrainDataLoaderConfig = builds(
@@ -14,9 +14,29 @@ TrainDataLoaderConfig = builds(
     batch_sampler=None,
 )
 
-ImageNetTrainDataLoaderConfig = builds(
+CIFAR100TrainDataLoaderConf = builds(
     DataLoader,
-    dataset=ImageNetConfig,
+    dataset=CIFAR100Conf,
     collate_fn=MultiBlockMaskBaseCollatorConf,
     builds_bases=(TrainDataLoaderConfig,),
 )
+
+ImageNet1kTrainDataLoaderConf = builds(
+    DataLoader,
+    dataset=ImageNet1kConf,
+    collate_fn=MultiBlockMaskBaseCollatorConf,
+    builds_bases=(TrainDataLoaderConfig,),
+)
+
+TinyImageNetTrainDataLoaderConf = builds(
+    DataLoader,
+    dataset=TinyImageNetConf,
+    collate_fn=MultiBlockMaskBaseCollatorConf,
+    builds_bases=(TrainDataLoaderConfig,),
+)
+
+data_loader_store = store(group="dataloader")
+
+data_loader_store(ImageNet1kTrainDataLoaderConf, name="imagenet1k")
+data_loader_store(TinyImageNetTrainDataLoaderConf, name="tinyimagenet")
+data_loader_store(CIFAR100TrainDataLoaderConf, name="cifar100")
