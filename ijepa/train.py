@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Any
 
 import numpy as np
 import torch
@@ -6,14 +7,15 @@ import torch.nn.functional as F
 from accelerate import Accelerator
 from hydra_zen.typing import Partial
 from loguru import logger
+from torch import Tensor
 from torch.nn import Module
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 from torch.utils.data import DataLoader
 from torch_ema import ExponentialMovingAverage
+from tqdm import tqdm
 
 from ijepa.masks.utils import apply_masks
-from ijepa.utils.logging import AverageMeter, gpu_timer, grad_logger
 from ijepa.utils.tensors import repeat_interleave_batch
 
 
@@ -35,7 +37,6 @@ def train(
     )
 
     target_encoder = deepcopy(encoder)
-    momentum_scheduler = momentum_scheduler_partial(encoder.parameters())
 
     optimizer = optimizer_partial(
         params=list(encoder.parameters()) + list(predictor.parameters()),
@@ -62,66 +63,73 @@ def train(
         scheduler,
     )
 
-    for epoch in range(num_epochs):
-        logger.info(f"Epoch {epoch + 1}")
+    momentum_scheduler = momentum_scheduler_partial(encoder.parameters())
 
-        loss_meter = AverageMeter()
-        maskA_meter = AverageMeter()
-        maskB_meter = AverageMeter()
-        time_meter = AverageMeter()
+    for _ in tqdm(range(num_epochs)):
+        for batch in tqdm(iter(dataloader)):
+            batch = train_step(
+                batch,
+                encoder,
+                target_encoder,
+                predictor,
+                scheduler,
+                momentum_scheduler,
+                optimizer,
+                accelerator,
+            )
 
-        for batch in iter(dataloader):
-            images = batch["images"]
-            masks_enc = batch["masks_enc"]
-            masks_pred = batch["masks_pred"]
-            maskA_meter.update(len(masks_enc[0][0]))
-            maskB_meter.update(len(masks_pred[0][0]))
 
-            def train_step():
-                _new_lr = scheduler.step()
+@torch.no_grad()
+def forward_target(batch: dict[str, Any], target_encoder: Module) -> Tensor:
+    target_encodings = target_encoder(batch["image"])
+    target_encodings = F.layer_norm(
+        target_encodings, (target_encodings.size(-1),)
+    )  # normalize over feature-dim
+    B = len(target_encodings)
+    # -- create targets (masked regions of h)
+    target_encodings = apply_masks(target_encodings, batch["masks_pred"])
+    return repeat_interleave_batch(target_encodings, B, repeat=len(batch["masks_enc"]))
 
-                def forward_target():
-                    with torch.no_grad():
-                        h = target_encoder(images)
-                        h = F.layer_norm(h, (h.size(-1),))  # normalize over feature-dim
-                        B = len(h)
-                        # -- create targets (masked regions of h)
-                        h = apply_masks(h, masks_pred)
-                        return repeat_interleave_batch(h, B, repeat=len(masks_enc))
 
-                def forward_context():
-                    z = encoder(images, masks_enc)
-                    return predictor(z, masks_enc, masks_pred)
+def forward_context(
+    batch: dict[str, Any], encoder: Module, predictor: Module
+) -> Tensor:
+    context_encodings = encoder(batch["image"], batch["masks_enc"])
+    return predictor(context_encodings, batch["masks_enc"], batch["masks_pred"])
 
-                def loss_fn(z, h):
-                    return F.smooth_l1_loss(z, h)
 
-                # Step 1. Forward
-                h = forward_target()
-                z = forward_context()
-                loss = loss_fn(z, h)
+def loss_fn(input: Tensor, target: Tensor):  # noqa: A002
+    return F.smooth_l1_loss(input, target)
 
-                #  Step 2. Backward & step
-                accelerator.backward(loss)
-                optimizer.step()
 
-                grad_stats = grad_logger(encoder.named_parameters())
-                optimizer.zero_grad()
+def train_step(
+    batch: dict[str, Any],
+    encoder: Module,
+    target_encoder: Module,
+    predictor: Module,
+    scheduler: LRScheduler,
+    momentum_scheduler: ExponentialMovingAverage,
+    optimizer: Optimizer,
+    accelerator: Accelerator,
+) -> dict[str, Any]:
+    optimizer.zero_grad()
+    # Step 1. Forward
+    target_encodings = forward_target(batch, target_encoder)
+    predicted_encodings = forward_context(batch, encoder, predictor)
+    loss = loss_fn(predicted_encodings, target_encodings)
 
-                # Step 3. momentum update of target encoder
-                with torch.no_grad():
-                    momentum_scheduler.update()
+    #  Step 2. Backward & step
+    accelerator.backward(loss)
+    optimizer.step()
+    scheduler.step()
 
-                return (float(loss), _new_lr, _new_wd, grad_stats)
+    # Step 3. momentum update of target encoder
+    with torch.no_grad():
+        momentum_scheduler.update()
 
-            (loss, _new_lr, _new_wd, grad_stats), etime = gpu_timer(train_step)
-            loss_meter.update(loss)
-            time_meter.update(etime)
+    batch["loss"] = loss.item()
 
-            assert not np.isnan(loss), "loss is nan"
-
-        # -- Save Checkpoint after every epoch
-        logger.info(f"avg. loss {loss_meter.avg:.3f}")
+    return batch
 
 
 if __name__ == "__main__":

@@ -6,9 +6,9 @@ from ijepa.configs.masks import MultiBlockMaskBaseCollatorConf
 
 TrainDataLoaderConfig = builds(
     DataLoader,
-    batch_size=16,
+    batch_size=32,
     shuffle=True,
-    num_workers=0,  # 10,
+    num_workers=8,
     pin_memory=False,
     drop_last=True,
     batch_sampler=None,

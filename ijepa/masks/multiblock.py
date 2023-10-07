@@ -7,13 +7,11 @@
 
 import math
 from collections.abc import Iterable
-from logging import getLogger
 from multiprocessing import Value
 
 import torch
-
-_GLOBAL_SEED = 0
-logger = getLogger()
+from loguru import logger
+from torch import Generator, Tensor
 
 
 class MaskCollator:
@@ -41,7 +39,7 @@ class MaskCollator:
         self.pred_mask_scale = pred_mask_scale
         self.aspect_ratio = aspect_ratio
         self.nenc = nenc
-        self.npred = npred
+        self.num_predictions = npred
         self.min_keep = min_keep  # minimum number of patches to keep
         self.allow_overlap = (
             allow_overlap  # whether to allow overlap b/w enc and pred masks
@@ -54,27 +52,41 @@ class MaskCollator:
             i.value += 1
             return i.value
 
-    def _sample_block_size(self, generator, scale, aspect_ratio_scale):
+    @staticmethod
+    def _sample_block_size(
+        generator: Generator,
+        scale: int,
+        aspect_ratio_scale: int,
+        height: int,
+        width: int,
+    ) -> tuple[int, int]:
         _rand = torch.rand(1, generator=generator).item()
         # -- Sample block scale
         min_s, max_s = scale
         mask_scale = min_s + _rand * (max_s - min_s)
-        max_keep = int(self.height * self.width * mask_scale)
+        max_keep = int(height * width * mask_scale)
         # -- Sample block aspect-ratio
         min_ar, max_ar = aspect_ratio_scale
         aspect_ratio = min_ar + _rand * (max_ar - min_ar)
         # -- Compute block height and width (given scale and aspect-ratio)
         h = int(round(math.sqrt(max_keep * aspect_ratio)))
         w = int(round(math.sqrt(max_keep / aspect_ratio)))
-        while h >= self.height:
+        while h >= height:
             h -= 1
-        while w >= self.width:
+        while w >= width:
             w -= 1
 
         return (h, w)
 
-    def _sample_block_mask(self, b_size, acceptable_regions=None):
-        h, w = b_size
+    @staticmethod
+    def _sample_block_mask(
+        block_size: tuple[int, int],
+        height: int,
+        width: int,
+        min_keep: int,
+        acceptable_regions: Tensor | None = None,
+    ) -> tuple[Tensor, Tensor]:
+        h, w = block_size
 
         def constrain_mask(mask, tries=0):
             """Helper to restrict given mask to a set of acceptable regions"""
@@ -89,16 +101,16 @@ class MaskCollator:
         valid_mask = False
         while not valid_mask:
             # -- Sample block top-left corner
-            top = torch.randint(0, self.height - h, (1,))
-            left = torch.randint(0, self.width - w, (1,))
-            mask = torch.zeros((self.height, self.width), dtype=torch.int32)
+            top = torch.randint(0, height - h, (1,))
+            left = torch.randint(0, width - w, (1,))
+            mask = torch.zeros((height, width), dtype=torch.int32)
             mask[top : top + h, left : left + w] = 1
             # -- Constrain mask to a set of acceptable regions
             if acceptable_regions is not None:
                 constrain_mask(mask, tries)
             mask = torch.nonzero(mask.flatten())
             # -- If mask too small try again
-            valid_mask = len(mask) > self.min_keep
+            valid_mask = len(mask) > min_keep
             if not valid_mask:
                 timeout -= 1
                 if timeout == 0:
@@ -110,7 +122,7 @@ class MaskCollator:
                     )
         mask = mask.squeeze()
         # --
-        mask_complement = torch.ones((self.height, self.width), dtype=torch.int32)
+        mask_complement = torch.ones((height, width), dtype=torch.int32)
         mask_complement[top : top + h, left : left + w] = 0
         # --
         return mask, mask_complement
@@ -131,15 +143,19 @@ class MaskCollator:
         seed = self.step()
         g = torch.Generator()
         g.manual_seed(seed)
-        p_size = self._sample_block_size(
+        prediction_size = self._sample_block_size(
             generator=g,
             scale=self.pred_mask_scale,
             aspect_ratio_scale=self.aspect_ratio,
+            height=self.height,
+            width=self.width,
         )
-        e_size = self._sample_block_size(
+        encoding_size = self._sample_block_size(
             generator=g,
             scale=self.enc_mask_scale,
             aspect_ratio_scale=(1.0, 1.0),
+            height=self.height,
+            width=self.width,
         )
 
         collated_masks_pred, collated_masks_enc = [], []
@@ -147,8 +163,10 @@ class MaskCollator:
         min_keep_enc = self.height * self.width
         for _ in range(B):
             masks_p, masks_C = [], []
-            for _ in range(self.npred):
-                mask, mask_C = self._sample_block_mask(p_size)
+            for _ in range(self.num_predictions):
+                mask, mask_C = self._sample_block_mask(
+                    prediction_size, self.height, self.width, self.min_keep
+                )
                 masks_p.append(mask)
                 masks_C.append(mask_C)
                 min_keep_pred = min(min_keep_pred, len(mask))
@@ -164,7 +182,10 @@ class MaskCollator:
             masks_e = []
             for _ in range(self.nenc):
                 mask, _ = self._sample_block_mask(
-                    e_size,
+                    encoding_size,
+                    self.height,
+                    self.width,
+                    self.min_keep,
                     acceptable_regions=acceptable_regions,
                 )
                 masks_e.append(mask)
@@ -181,11 +202,7 @@ class MaskCollator:
         ]
         collated_masks_enc = torch.utils.data.default_collate(collated_masks_enc)
 
-        collated_masks_pred_nested = torch.nested.as_nested_tensor(collated_masks_pred)
-        collated_masks_enc_nested = torch.nested.as_nested_tensor(collated_masks_enc)
-
-        return {
-            "image": collated_batch["image"],
-            "masks_enc": collated_masks_pred_nested,
-            "masks_pred": collated_masks_enc_nested,
+        return collated_batch | {
+            "masks_enc": collated_masks_enc,
+            "masks_pred": collated_masks_pred,
         }
