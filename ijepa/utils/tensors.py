@@ -9,11 +9,14 @@ import math
 from logging import getLogger
 
 import torch
+from torch import Tensor
 
 logger = getLogger()
 
 
-def _no_grad_trunc_normal_(tensor, mean, std, a, b):
+def _no_grad_trunc_normal_(
+    tensor: Tensor, mean: float, std: float, a: float, b: float
+) -> Tensor:
     # Cut & paste from PyTorch official master until it's in a few official releases
     # - RW
     # Method based on https://people.sc.fsu.edu/~jburkardt/presentations/truncated_normal.pdf
@@ -45,12 +48,13 @@ def _no_grad_trunc_normal_(tensor, mean, std, a, b):
         return tensor
 
 
-def trunc_normal_(tensor, mean=0.0, std=1.0, a=-2.0, b=2.0):
-    # type: (Tensor, float, float, float, float) -> Tensor
+def trunc_normal_(
+    tensor: Tensor, mean: float = 0.0, std: float = 1.0, a: float = -2.0, b: float = 2.0
+) -> Tensor:
     return _no_grad_trunc_normal_(tensor, mean, std, a, b)
 
 
-def apply_masks(x, masks):
+def apply_masks(x: Tensor, masks: list[Tensor]) -> Tensor:
     """
     :param x: tensor of shape [B (batch-size), N (num-patches), D (feature-dim)]
     :param masks: list of tensors containing indices of patches in [N] to keep
@@ -62,7 +66,7 @@ def apply_masks(x, masks):
     return torch.cat(all_x, dim=0)
 
 
-def repeat_interleave_batch(x, B, repeat):
+def repeat_interleave_batch(x: Tensor, B: int, repeat: int) -> Tensor:
     N = len(x) // B
     return torch.cat(
         [

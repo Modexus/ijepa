@@ -55,8 +55,8 @@ class MaskCollator:
     @staticmethod
     def _sample_block_size(
         generator: Generator,
-        scale: tuple[int, int],
-        aspect_ratio_scale: tuple[int, int],
+        scale: tuple[float, float],
+        aspect_ratio_scale: tuple[float, float],
         height: int,
         width: int,
     ) -> tuple[int, int]:
@@ -88,7 +88,7 @@ class MaskCollator:
     ) -> tuple[Tensor, Tensor]:
         h, w = block_size
 
-        def constrain_mask(mask, tries=0):
+        def constrain_mask(mask: Tensor, tries: int = 0) -> None:
             """Helper to restrict given mask to a set of acceptable regions"""
             N = max(int(len(acceptable_regions) - tries), 0)
             for k in range(N):

@@ -29,7 +29,8 @@
             "justMyCode": true,
             "args": [
                 "-cn",
-                "train_tinyimagenet"
+                "train_tinyimagenet",
+                "dataloader.num_workers=0"
             ]
         }
     ]
