@@ -31,7 +31,7 @@ TrainTinyImageNetConf = make_config(
     image_size=56,
     patch_size=4,
     encoder=ViTEncoderTinyConf(),
-    dataloader=TinyImageNetTrainDataLoaderConf,
+    dataloader=TinyImageNetTrainDataLoaderConf(batch_size=128),
     bases=(TrainImagenet1kConf,),
 )
 

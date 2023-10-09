@@ -49,10 +49,11 @@ def train(
         lr=actual_lr,
         params=list(encoder.parameters()) + list(predictor.parameters()),
     )
+    actual_num_warmup_steps = min(1, num_warmup_steps * 256 // effective_batch_size)
     scheduler = scheduler_partial(
         optimizer,
-        num_warmup_steps=num_warmup_steps,
-        num_training_steps=num_epochs * len(dataloader),
+        num_warmup_steps=actual_num_warmup_steps,
+        num_training_steps=len(dataloader) * num_epochs,
     )
 
     encoder, predictor, target_encoder, momentum_scheduler = accelerator.prepare(

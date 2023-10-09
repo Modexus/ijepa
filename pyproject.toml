@@ -31,6 +31,7 @@ optional = true
 [tool.poetry.group.style.dependencies]
 ruff = "^0.0.291"
 black = "^23.9.1"
+pyright = "^1.1.330.post0"
 
 [build-system]
 requires = ["poetry-core"]
