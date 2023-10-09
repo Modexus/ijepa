@@ -6,8 +6,10 @@ from ijepa.configs.data import (
 )
 from ijepa.configs.models import (
     EMAModelConf,
-    ViTBasePredictorConf,
     ViTEncoderTinyConf,
+    ViTEncoderTorchTinyConf,
+    ViTPredictorBaseConf,
+    ViTPredictorTorchBaseConf,
 )
 from ijepa.configs.optimizers import AdamWConf
 from ijepa.configs.schedulers import CosineSchedulerBaseConf
@@ -19,8 +21,8 @@ TrainImagenet1kConf = make_config(
     patch_size=16,
     base_lr=1e-3,
     num_warmup_steps=40,
-    encoder=ViTEncoderTinyConf(),
-    predictor_partial=ViTBasePredictorConf,
+    encoder=ViTEncoderTinyConf,
+    predictor_partial=ViTPredictorBaseConf,
     dataloader=ImageNet1kTrainDataLoaderConf,
     optimizer_partial=AdamWConf,
     scheduler_partial=CosineSchedulerBaseConf,
@@ -30,7 +32,8 @@ TrainImagenet1kConf = make_config(
 TrainTinyImageNetConf = make_config(
     image_size=56,
     patch_size=4,
-    encoder=ViTEncoderTinyConf(),
+    encoder=ViTEncoderTorchTinyConf,
+    predictor_partial=ViTPredictorBaseConf,
     dataloader=TinyImageNetTrainDataLoaderConf(batch_size=128),
     bases=(TrainImagenet1kConf,),
 )

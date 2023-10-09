@@ -34,7 +34,7 @@ def train(
     predictor = predictor_partial(
         num_patches=encoder.patch_embed.num_patches,  # type: ignore
         embed_dim=encoder.embed_dim,
-        num_heads=encoder.num_heads,
+        num_heads=encoder.num_heads#encoder.encoder.layers[0].self_attn.num_heads,  # type: ignore
     )
     target_encoder = deepcopy(encoder)
     momentum_scheduler = momentum_scheduler_partial(encoder.parameters())
@@ -128,7 +128,7 @@ def train_step(
 
     # Step 3. momentum update of target encoder
     momentum_scheduler.step(
-        [param.cpu() for param in encoder.parameters()],  # type: ignore  # noqa: PGH003
+        [param.cpu() for param in encoder.parameters()],  # type: ignore
     )
 
     batch["loss"] = loss.item()

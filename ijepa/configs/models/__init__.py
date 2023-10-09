@@ -1,10 +1,19 @@
 from .ema import EMAModelConf
-from .vit import ViTBasePredictorConf, ViTEncoderTinyConf
+from .vit import (
+    ViTEncoderTinyConf,
+    ViTEncoderTorchBaseConf,
+    ViTEncoderTorchTinyConf,
+    ViTPredictorBaseConf,
+    ViTPredictorTorchBaseConf,
+)
 
 __all__ = [
     # ema
     "EMAModelConf",
     # vit
-    "ViTBasePredictorConf",
+    "ViTEncoderTorchBaseConf",
+    "ViTPredictorBaseConf",
     "ViTEncoderTinyConf",
+    "ViTEncoderTorchTinyConf",
+    "ViTPredictorTorchBaseConf",
 ]

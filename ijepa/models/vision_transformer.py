@@ -6,10 +6,13 @@
 #
 
 import math
+from functools import partial
+from typing import Any
 
 import numpy as np
 import torch
-from torch import nn
+from torch import Tensor, nn
+from torch.nn import TransformerEncoder, TransformerEncoderLayer
 
 from ijepa.masks.utils import apply_masks
 from ijepa.utils.tensors import repeat_interleave_batch, trunc_normal_
@@ -536,3 +539,171 @@ class VisionTransformer(nn.Module):
         )
         pos_embed = pos_embed.permute(0, 2, 3, 1).view(1, -1, dim)
         return torch.cat((class_emb.unsqueeze(0), pos_embed), dim=1)
+
+
+class ViT(nn.Module):
+    def __init__(
+        self,
+        image_size: tuple[int, int],
+        patch_size: int,
+        in_channels: int,
+        embed_dim: int,
+        encoder: TransformerEncoder,
+    ) -> None:
+        super().__init__()
+
+        self.patch_embed = PatchEmbed(
+            img_size=image_size[0],
+            patch_size=patch_size,
+            in_chans=in_channels,
+            embed_dim=embed_dim,
+        )
+        self.encoder = encoder
+        self.embed_dim = embed_dim
+
+        num_patches = self.patch_embed.num_patches
+        self.pos_embed = nn.Parameter(
+            torch.zeros(1, num_patches, embed_dim),
+            requires_grad=False,
+        )
+        pos_embed = get_2d_sincos_pos_embed(
+            self.pos_embed.shape[-1],
+            int(self.patch_embed.num_patches**0.5),
+            cls_token=False,
+        )
+        self.pos_embed.data.copy_(torch.from_numpy(pos_embed).float().unsqueeze(0))
+
+    def forward(self, x, masks: list[Tensor] | None = None, **kwargs: Any) -> Tensor:
+        if masks is not None and not isinstance(masks, list):
+            masks = [masks]
+
+        # -- patchify x
+        x = self.patch_embed(x)
+        B, N, D = x.shape
+
+        # -- add positional embedding to x
+        pos_embed = self.interpolate_pos_encoding(x, self.pos_embed)
+        x = x + pos_embed
+
+        # -- mask x
+        if masks is not None:
+            x = apply_masks(x, masks)
+
+        return self.encoder(x, **kwargs)
+
+    def interpolate_pos_encoding(self, x, pos_embed):
+        npatch = x.shape[1] - 1
+        N = pos_embed.shape[1] - 1
+        if npatch == N:
+            return pos_embed
+        class_emb = pos_embed[:, 0]
+        pos_embed = pos_embed[:, 1:]
+        dim = x.shape[-1]
+        pos_embed = nn.functional.interpolate(
+            pos_embed.reshape(1, int(math.sqrt(N)), int(math.sqrt(N)), dim).permute(
+                0,
+                3,
+                1,
+                2,
+            ),
+            scale_factor=math.sqrt(npatch / N),
+            mode="bicubic",
+        )
+        pos_embed = pos_embed.permute(0, 2, 3, 1).view(1, -1, dim)
+        return torch.cat((class_emb.unsqueeze(0), pos_embed), dim=1)
+
+
+class ViTPredictor(nn.Module):
+    """Vision Transformer"""
+
+    def __init__(
+        self,
+        num_patches: int,
+        embed_dim: int,
+        predictor_embed_dim: int,
+        num_heads: int,
+        num_layers: int,
+        encoder_layer_partial: partial[TransformerEncoderLayer],
+        norm_layer=nn.LayerNorm,
+        init_std=0.02,
+        **kwargs,
+    ) -> None:
+        super().__init__()
+
+        self.encoder = TransformerEncoder(
+            encoder_layer=encoder_layer_partial(nhead=num_heads, batch_first=True),
+            num_layers=num_layers,
+            norm=norm_layer(predictor_embed_dim),
+        )
+
+        self.predictor_embed = nn.Linear(embed_dim, predictor_embed_dim, bias=True)
+        self.mask_token = nn.Parameter(torch.zeros(1, 1, predictor_embed_dim))
+
+        # --
+        self.predictor_pos_embed = nn.Parameter(
+            torch.zeros(1, num_patches, predictor_embed_dim),
+            requires_grad=False,
+        )
+        predictor_pos_embed = get_2d_sincos_pos_embed(
+            self.predictor_pos_embed.shape[-1],
+            int(num_patches**0.5),
+            cls_token=False,
+        )
+        self.predictor_pos_embed.data.copy_(
+            torch.from_numpy(predictor_pos_embed).float().unsqueeze(0),
+        )
+
+        self.predictor_proj = nn.Linear(predictor_embed_dim, embed_dim, bias=True)
+        # ------
+        self.init_std = init_std
+        trunc_normal_(self.mask_token, std=self.init_std)
+        self.apply(self._init_weights)
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            trunc_normal_(m.weight, std=self.init_std)
+            if isinstance(m, nn.Linear) and m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+        elif isinstance(m, nn.LayerNorm):
+            nn.init.constant_(m.bias, 0)
+            nn.init.constant_(m.weight, 1.0)
+        elif isinstance(m, nn.Conv2d):
+            trunc_normal_(m.weight, std=self.init_std)
+            if m.bias is not None:
+                nn.init.constant_(m.bias, 0)
+
+    def forward(self, x, masks_x, masks):
+        assert masks is not None, "Cannot run predictor without mask indices"
+        assert masks_x is not None, "Cannot run predictor without mask indices"
+        assert isinstance(masks_x, list), "masks_x should be a list"
+        assert isinstance(masks, list), "masks should be a list"
+
+        # -- Batch Size
+        B = len(x) // len(masks_x)
+
+        # -- map from encoder-dim to pedictor-dim
+        x = self.predictor_embed(x)
+
+        # -- add positional embedding to x tokens
+        x_pos_embed = self.predictor_pos_embed.repeat(B, 1, 1)
+        x += apply_masks(x_pos_embed, masks_x)
+
+        _, N_ctxt, D = x.shape
+
+        # -- concat mask tokens to x
+        pos_embs = self.predictor_pos_embed.repeat(B, 1, 1)
+        pos_embs = apply_masks(pos_embs, masks)
+        pos_embs = repeat_interleave_batch(pos_embs, B, repeat=len(masks_x))
+        # --
+        pred_tokens = self.mask_token.repeat(pos_embs.size(0), pos_embs.size(1), 1)
+        # --
+        pred_tokens += pos_embs
+        x = x.repeat(len(masks), 1, 1)
+        x = torch.cat([x, pred_tokens], dim=1)
+
+        # -- fwd prop
+        x = self.encoder(x)
+
+        # -- return preds for mask tokens
+        x = x[:, N_ctxt:]
+        return self.predictor_proj(x)
