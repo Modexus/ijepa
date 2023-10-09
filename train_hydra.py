@@ -20,7 +20,5 @@ if __name__ == "__main__":
     store.add_to_hydra_store()
 
     task_function.hydra_main(
-        config_name="default",
-        version_base=None,
-        config_path="configs"
+        config_name="default", version_base=None, config_path="configs"
     )

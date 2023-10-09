@@ -539,4 +539,3 @@ class VisionTransformer(nn.Module):
         )
         pos_embed = pos_embed.permute(0, 2, 3, 1).view(1, -1, dim)
         return torch.cat((class_emb.unsqueeze(0), pos_embed), dim=1)
-

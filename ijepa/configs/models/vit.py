@@ -1,13 +1,13 @@
 from hydra_zen import builds, store
 from torch import nn
-
+from functools import partial
 from ijepa.models import VisionTransformer, VisionTransformerPredictor
 
 LayerNormConf = builds(nn.LayerNorm, zen_partial=True, populate_full_signature=True)
 ViTEncoderBaseConf = builds(
     VisionTransformer,
     img_size=("${image_size}", "${image_size}"),
-    patch_size=16,
+    patch_size="${patch_size}",
     in_chans=3,
     embed_dim=768,
     predictor_embed_dim=384,
@@ -25,11 +25,14 @@ ViTEncoderBaseConf = builds(
     populate_full_signature=True,
 )
 
-ViTEncoderTinyConf = ViTEncoderBaseConf(embed_dim=192, num_heads=3)
-ViTEncoderSmallConf = ViTEncoderBaseConf(embed_dim=384, num_heads=6)
-ViTEncoderLargeConf = ViTEncoderBaseConf(embed_dim=1024, num_heads=16, depth=24)
-ViTEncoderHugeConf = ViTEncoderBaseConf(embed_dim=1280, num_heads=16, depth=32)
-ViTEncoderGiantConf = ViTEncoderBaseConf(
+ViTEncoderTinyConf = partial(ViTEncoderBaseConf, embed_dim=192, num_heads=3)
+ViTEncoderSmallConf = partial(ViTEncoderBaseConf, embed_dim=384, num_heads=6)
+ViTEncoderLargeConf = partial(
+    ViTEncoderBaseConf, embed_dim=1024, num_heads=16, depth=24
+)
+ViTEncoderHugeConf = partial(ViTEncoderBaseConf, embed_dim=1280, num_heads=16, depth=32)
+ViTEncoderGiantConf = partial(
+    ViTEncoderBaseConf,
     embed_dim=1408,
     num_heads=16,
     depth=40,

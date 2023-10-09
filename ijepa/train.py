@@ -114,7 +114,9 @@ def train_step(
     scheduler.step()
 
     # Step 3. momentum update of target encoder
-    momentum_scheduler.step(encoder.parameters())
+    momentum_scheduler.step(
+        [param.cpu() for param in encoder.parameters()],  # type: ignore  # noqa: PGH003
+    )
 
     batch["loss"] = loss.item()
 

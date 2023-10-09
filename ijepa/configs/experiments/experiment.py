@@ -16,7 +16,8 @@ TrainImagenet1kConf = make_config(
     seed=42,
     num_epochs=10,
     image_size=224,
-    encoder=ViTEncoderTinyConf,
+    patch_size=16,
+    encoder=ViTEncoderTinyConf(),
     predictor_partial=ViTBasePredictorConf,
     dataloader=ImageNet1kTrainDataLoaderConf,
     optimizer_partial=AdamWConf,
@@ -25,7 +26,9 @@ TrainImagenet1kConf = make_config(
 )
 
 TrainTinyImageNetConf = make_config(
-    image_size=64,
+    image_size=56,
+    patch_size=4,
+    encoder=ViTEncoderTinyConf(),
     dataloader=TinyImageNetTrainDataLoaderConf,
     bases=(TrainImagenet1kConf,),
 )
