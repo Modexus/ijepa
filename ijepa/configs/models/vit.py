@@ -1,6 +1,8 @@
+from functools import partial
+
 from hydra_zen import builds, store
 from torch import nn
-from functools import partial
+
 from ijepa.models import VisionTransformer, VisionTransformerPredictor
 
 LayerNormConf = builds(nn.LayerNorm, zen_partial=True, populate_full_signature=True)
@@ -10,9 +12,7 @@ ViTEncoderBaseConf = builds(
     patch_size="${patch_size}",
     in_chans=3,
     embed_dim=768,
-    predictor_embed_dim=384,
     depth=12,
-    predictor_depth=12,
     num_heads=12,
     mlp_ratio=4.0,
     qkv_bias=True,

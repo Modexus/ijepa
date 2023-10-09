@@ -1,4 +1,3 @@
-from functools import partial
 
 from hydra_zen import builds, just, store
 from torchvision.transforms.v2 import (

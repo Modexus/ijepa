@@ -9,7 +9,7 @@ TrainDataLoaderConfig = builds(
     batch_size=8,
     shuffle=True,
     num_workers=8,
-    pin_memory=False,
+    pin_memory=True,
     drop_last=True,
     batch_sampler=None,
 )

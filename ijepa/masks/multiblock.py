@@ -17,19 +17,18 @@ from torch import Generator, Tensor
 class MaskCollator:
     def __init__(
         self,
-        input_size=(224, 224),
-        patch_size=16,
-        enc_mask_scale=(0.2, 0.8),
-        pred_mask_scale=(0.2, 0.8),
-        aspect_ratio=(0.3, 3.0),
-        nenc=1,
-        npred=2,
-        min_keep=4,
-        allow_overlap=False,
+        input_size: tuple[int, int] = (224, 224),
+        patch_size: int = 16,
+        enc_mask_scale: tuple[float, float] = (0.2, 0.8),
+        pred_mask_scale: tuple[float, float] = (0.2, 0.8),
+        aspect_ratio: tuple[float, float] = (0.3, 3.0),
+        nenc: int = 1,
+        npred: int = 2,
+        min_keep: int = 4,
+        allow_overlap: bool = False,
     ) -> None:
         super().__init__()
-        if not isinstance(input_size, Iterable):
-            input_size = (input_size,) * 2
+
         self.patch_size = patch_size
         self.height, self.width = (
             input_size[0] // patch_size,
@@ -49,8 +48,8 @@ class MaskCollator:
     def step(self):
         i = self._itr_counter
         with i.get_lock():
-            i.value += 1
-            return i.value
+            i.value += 1  # type: ignore  # noqa: PGH003
+            return i.value  # type: ignore  # noqa: PGH003
 
     @staticmethod
     def _sample_block_size(
@@ -84,34 +83,35 @@ class MaskCollator:
         height: int,
         width: int,
         min_keep: int,
-        acceptable_regions: Tensor | None = None,
+        acceptable_regions: list[Tensor] | None = None,
     ) -> tuple[Tensor, Tensor]:
         h, w = block_size
 
-        def constrain_mask(mask: Tensor, tries: int = 0) -> None:
-            """Helper to restrict given mask to a set of acceptable regions"""
-            N = max(int(len(acceptable_regions) - tries), 0)
-            for k in range(N):
-                mask *= acceptable_regions[k]
-
-        # --
         # -- Loop to sample masks until we find a valid one
         tries = 0
         timeout = og_timeout = 20
         valid_mask = False
+        top = torch.randint(0, height - h, (1,))
+        left = torch.randint(0, width - w, (1,))
+        mask = torch.zeros((height, width), dtype=torch.int32)
         while not valid_mask:
             # -- Sample block top-left corner
-            top = torch.randint(0, height - h, (1,))
-            left = torch.randint(0, width - w, (1,))
-            mask = torch.zeros((height, width), dtype=torch.int32)
             mask[top : top + h, left : left + w] = 1
             # -- Constrain mask to a set of acceptable regions
             if acceptable_regions is not None:
+
+                def constrain_mask(mask: Tensor, tries: int = 0) -> None:
+                    """Helper to restrict given mask to a set of acceptable regions"""
+                    N = max(int(len(acceptable_regions) - tries), 0)
+                    for k in range(N):
+                        mask *= acceptable_regions[k]
+
                 constrain_mask(mask, tries)
             mask = torch.nonzero(mask.flatten())
             # -- If mask too small try again
             valid_mask = len(mask) > min_keep
             if not valid_mask:
+                mask = torch.zeros((height, width), dtype=torch.int32)
                 timeout -= 1
                 if timeout == 0:
                     tries += 1
@@ -120,6 +120,7 @@ class MaskCollator:
                         'Mask generator says: "Valid mask not found,'
                         f"decreasing acceptable-regions [{tries}]",
                     )
+
         mask = mask.squeeze()
         # --
         mask_complement = torch.ones((height, width), dtype=torch.int32)
@@ -162,20 +163,20 @@ class MaskCollator:
         min_keep_pred = self.height * self.width
         min_keep_enc = self.height * self.width
         for _ in range(B):
-            masks_p, masks_C = [], []
+            masks_predictor: list[Tensor] = []
+            acceptable_regions: list[Tensor] | None = []
             for _ in range(self.num_predictions):
-                mask, mask_C = self._sample_block_mask(
+                mask_predictor, mask_context = self._sample_block_mask(
                     prediction_size,
                     self.height,
                     self.width,
                     self.min_keep,
                 )
-                masks_p.append(mask)
-                masks_C.append(mask_C)
-                min_keep_pred = min(min_keep_pred, len(mask))
-            collated_masks_pred.append(masks_p)
+                masks_predictor.append(mask_predictor)
+                acceptable_regions.append(mask_context)
+                min_keep_pred = min(min_keep_pred, len(mask_predictor))
+            collated_masks_pred.append(masks_predictor)
 
-            acceptable_regions = masks_C
             try:
                 if self.allow_overlap:
                     acceptable_regions = None
@@ -184,15 +185,15 @@ class MaskCollator:
 
             masks_e = []
             for _ in range(self.nenc):
-                mask, _ = self._sample_block_mask(
+                mask_predictor, _ = self._sample_block_mask(
                     encoding_size,
                     self.height,
                     self.width,
                     self.min_keep,
                     acceptable_regions=acceptable_regions,
                 )
-                masks_e.append(mask)
-                min_keep_enc = min(min_keep_enc, len(mask))
+                masks_e.append(mask_predictor)
+                min_keep_enc = min(min_keep_enc, len(mask_predictor))
             collated_masks_enc.append(masks_e)
 
         collated_masks_pred = [

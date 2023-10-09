@@ -6,7 +6,6 @@
 #
 
 import math
-from functools import partial
 
 import numpy as np
 import torch
@@ -95,7 +94,7 @@ class DropPath(nn.Module):
     (when applied in main path of residual blocks).
     """
 
-    def __init__(self, drop_prob=None) -> None:
+    def __init__(self, drop_prob: float = 0.0) -> None:
         super().__init__()
         self.drop_prob = drop_prob
 
@@ -240,7 +239,7 @@ class ConvEmbed(nn.Module):
         self,
         channels,
         strides,
-        img_size=224,
+        img_size: tuple[int, int] = (224, 224),
         in_chans=3,
         batch_norm=True,
     ) -> None:
@@ -409,9 +408,7 @@ class VisionTransformer(nn.Module):
         patch_size=16,
         in_chans=3,
         embed_dim=768,
-        predictor_embed_dim=384,
         depth=12,
-        predictor_depth=12,
         num_heads=12,
         mlp_ratio=4.0,
         qkv_bias=True,

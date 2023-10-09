@@ -24,10 +24,11 @@
             "name": "Python: train tiny_imagenet",
             "type": "python",
             "request": "launch",
-            "program": "train_hydra.py",
+            "module": "accelerate.commands.launch",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
+                "train_hydra.py",
                 "-cn",
                 "train_tinyimagenet",
                 "dataloader.num_workers=0"

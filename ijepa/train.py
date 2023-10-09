@@ -25,26 +25,36 @@ def train(
     scheduler_partial: Partial[LRScheduler],
     momentum_scheduler_partial: Partial[EMAModel],
     num_epochs: int,
+    base_lr: float,
+    num_warmup_steps: int,
 ) -> None:
+    accelerator = Accelerator(even_batches=False, log_with="wandb")
+    accelerator.init_trackers("ijepa")
+
     predictor = predictor_partial(
-        num_patches=encoder.patch_embed.num_patches,
+        num_patches=encoder.patch_embed.num_patches,  # type: ignore
         embed_dim=encoder.embed_dim,
         num_heads=encoder.num_heads,
     )
-
     target_encoder = deepcopy(encoder)
+    momentum_scheduler = momentum_scheduler_partial(encoder.parameters())
 
+    effective_batch_size = (
+        dataloader.batch_size  # type: ignore
+        * accelerator.gradient_accumulation_steps
+        * accelerator.num_processes
+    )
+    actual_lr = base_lr * effective_batch_size / 256
     optimizer = optimizer_partial(
+        lr=actual_lr,
         params=list(encoder.parameters()) + list(predictor.parameters()),
     )
     scheduler = scheduler_partial(
         optimizer,
+        num_warmup_steps=num_warmup_steps,
         num_training_steps=num_epochs * len(dataloader),
     )
 
-    momentum_scheduler = momentum_scheduler_partial(encoder.parameters())
-
-    accelerator = Accelerator(even_batches=False)
     encoder, predictor, target_encoder, momentum_scheduler = accelerator.prepare(
         encoder, predictor, target_encoder, momentum_scheduler
     )
@@ -53,7 +63,7 @@ def train(
     )
 
     for _ in tqdm(range(num_epochs)):
-        for batch in tqdm(iter(dataloader)):
+        for _, batch in tqdm(enumerate(dataloader)):
             batch = train_step(
                 batch,
                 encoder,
@@ -64,6 +74,8 @@ def train(
                 optimizer,
                 accelerator,
             )
+
+    accelerator.end_training()
 
 
 @torch.no_grad()
@@ -119,5 +131,9 @@ def train_step(
     )
 
     batch["loss"] = loss.item()
+    accelerator.log({"training_loss": batch["loss"]})
+    accelerator.log({"lr": scheduler.get_last_lr()[0]})
+    accelerator.log({"mask_enc_length": len(batch["masks_enc"][0][0])})
+    accelerator.log({"mask_pred_length": len(batch["masks_pred"][0][0])})
 
     return batch
