@@ -7,7 +7,21 @@ LayerNormConf = builds(nn.LayerNorm, zen_partial=True, populate_full_signature=T
 ViTEncoderBaseConf = builds(
     VisionTransformer,
     img_size=("${image_size}", "${image_size}"),
+    patch_size=16,
+    in_chans=3,
+    embed_dim=768,
+    predictor_embed_dim=384,
+    depth=12,
+    predictor_depth=12,
+    num_heads=12,
+    mlp_ratio=4.0,
+    qkv_bias=True,
+    qk_scale=None,
+    drop_rate=0.0,
+    attn_drop_rate=0.0,
+    drop_path_rate=0.0,
     norm_layer=LayerNormConf(eps=1e-6),
+    init_std=0.02,
     populate_full_signature=True,
 )
 
@@ -16,11 +30,16 @@ ViTEncoderSmallConf = ViTEncoderBaseConf(embed_dim=384, num_heads=6)
 ViTEncoderLargeConf = ViTEncoderBaseConf(embed_dim=1024, num_heads=16, depth=24)
 ViTEncoderHugeConf = ViTEncoderBaseConf(embed_dim=1280, num_heads=16, depth=32)
 ViTEncoderGiantConf = ViTEncoderBaseConf(
-    embed_dim=1408, num_heads=16, depth=40, mlp_ratio=48 / 11
+    embed_dim=1408,
+    num_heads=16,
+    depth=40,
+    mlp_ratio=48 / 11,
 )
 
 ViTBasePredictorConf = builds(
-    VisionTransformerPredictor, populate_full_signature=True, zen_partial=True
+    VisionTransformerPredictor,
+    populate_full_signature=True,
+    zen_partial=True,
 )
 
 encoder_store = store(group="encoder")
