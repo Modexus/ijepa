@@ -549,6 +549,7 @@ class ViT(nn.Module):
         in_channels: int,
         embed_dim: int,
         encoder: TransformerEncoder,
+        norm_layer: nn.Module | None = nn.LayerNorm,  # type: ignore
     ) -> None:
         super().__init__()
 
@@ -573,6 +574,8 @@ class ViT(nn.Module):
         )
         self.pos_embed.data.copy_(torch.from_numpy(pos_embed).float().unsqueeze(0))
 
+        self.norm = norm_layer(embed_dim) if norm_layer is not None else None
+
     def forward(self, x, masks: list[Tensor] | None = None, **kwargs: Any) -> Tensor:
         if masks is not None and not isinstance(masks, list):
             masks = [masks]
@@ -589,7 +592,12 @@ class ViT(nn.Module):
         if masks is not None:
             x = apply_masks(x, masks)
 
-        return self.encoder(x, **kwargs)
+        x = self.encoder(x, **kwargs)
+
+        if self.norm is not None:
+            x = self.norm(x)
+
+        return x
 
     def interpolate_pos_encoding(self, x, pos_embed):
         npatch = x.shape[1] - 1
@@ -624,7 +632,7 @@ class ViTPredictor(nn.Module):
         num_heads: int,
         num_layers: int,
         encoder_layer_partial: partial[TransformerEncoderLayer],
-        norm_layer=nn.LayerNorm,
+        norm_layer: nn.Module = nn.LayerNorm,  # type: ignore
         init_std=0.02,
         **kwargs,
     ) -> None:

@@ -32,14 +32,12 @@ ViTEncoderBaseConf = builds(
 )
 
 ViTEncoderTinyConf = builds(
-    VisionTransformer, embed_dim=192, num_heads=3, build_bases=(ViTEncoderBaseConf,)
+    VisionTransformer, embed_dim=192, num_heads=3, builds_bases=(ViTEncoderBaseConf,)
 )
-ViTEncoderSmallConf = partial(ViTEncoderBaseConf, embed_dim=384, num_heads=6)
-ViTEncoderLargeConf = partial(
-    ViTEncoderBaseConf, embed_dim=1024, num_heads=16, depth=24
-)
-ViTEncoderHugeConf = partial(ViTEncoderBaseConf, embed_dim=1280, num_heads=16, depth=32)
-ViTEncoderGiantConf = partial(
+ViTEncoderSmallConf = builds(ViTEncoderBaseConf, embed_dim=384, num_heads=6)
+ViTEncoderLargeConf = builds(ViTEncoderBaseConf, embed_dim=1024, num_heads=16, depth=24)
+ViTEncoderHugeConf = builds(ViTEncoderBaseConf, embed_dim=1280, num_heads=16, depth=32)
+ViTEncoderGiantConf = builds(
     ViTEncoderBaseConf,
     embed_dim=1408,
     num_heads=16,
@@ -63,7 +61,7 @@ TransformerEncoderLayerBaseConf = builds(
     activation="gelu",
     layer_norm_eps=1e-6,
     batch_first=True,
-    norm_first=False,  # FIXME: TRUE
+    norm_first=True,
     populate_full_signature=True,
 )
 
@@ -90,7 +88,7 @@ ViTEncoderTorchTinyConf = builds(
     encoder=TransformerEncoderBaseConf(
         encoder_layer=TransformerEncoderLayerBaseConf(
             d_model=192,
-            nhead=2,
+            nhead=3,
             dim_feedforward=192 * 4,
         )
     ),
@@ -107,6 +105,7 @@ ViTPredictorTorchBaseConf = builds(
     num_layers=6,
     predictor_embed_dim=384,
     populate_full_signature=True,
+    norm_layer=LayerNormConf(eps=1e-6),
     zen_partial=True,
 )
 
